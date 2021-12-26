@@ -6,6 +6,9 @@ const User = mongoose.model("User");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../keys");
+
 router.get("/signup", (req, res) => {
   const { name, email, password } = req.body;
 
@@ -54,7 +57,8 @@ router.get("/signin", (req, res) => {
       } else {
         bcrypt.compare(password, foundUser.password, function (err, result) {
           if (result) {
-            res.json({ message: "Authentic User" });
+            const token = jwt.sign({ _id: foundUser._id }, JWT_SECRET);
+            res.json({ token: token });
           } else {
             res.status(404).json({ message: "Wrong Password" });
           }
