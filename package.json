@@ -1,0 +1,15 @@
+{
+  "name": "instagram-clone",
+  "version": "1.0.0",
+  "description": "Instagram Clone using MERN stack",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sahil Shende",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "nodemon": "^2.0.15"
+  }
+}
