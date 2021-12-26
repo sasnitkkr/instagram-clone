@@ -3,6 +3,9 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const User = mongoose.model("User");
 
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 router.get("/signup", (req, res) => {
   const { name, email, password } = req.body;
 
@@ -17,13 +20,45 @@ router.get("/signup", (req, res) => {
       if (foundUser) {
         res.status(422).json({ err: "User already exists with given email." });
       } else {
-        const newUser = new User({
-          name: name,
-          email: email,
-          password: password,
+        bcrypt.hash(password, saltRounds, function (err, hash) {
+          // Store hash in your password DB.
+          if (err) {
+            console.log("Error in bcrypting");
+          } else {
+            const newUser = new User({
+              name: name,
+              email: email,
+              password: hash,
+            });
+            newUser.save();
+            res.json({ message: "Successfully saved user" });
+          }
         });
-        newUser.save();
-        res.json({ message: "Successfully saved user" });
+      }
+    }
+  });
+});
+
+router.get("/signin", (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(422).json({ message: "enter all fields" });
+    return;
+  }
+  User.findOne({ email: email }, function (err, foundUser) {
+    if (err) {
+      console.log("Error finding pre-existing user");
+    } else {
+      if (!foundUser) {
+        res.status(422).json({ error: "User with given email doesnot exist" });
+      } else {
+        bcrypt.compare(password, foundUser.password, function (err, result) {
+          if (result) {
+            res.json({ message: "Authentic User" });
+          } else {
+            res.status(404).json({ message: "Wrong Password" });
+          }
+        });
       }
     }
   });
