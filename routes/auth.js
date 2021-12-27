@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const User = mongoose.model("User");
+const requireLogin = require("../middlewares/requireLogin");
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -9,7 +10,11 @@ const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../keys");
 
-router.get("/signup", (req, res) => {
+router.get("/protected", requireLogin, (req, res) => {
+  res.send("Shaka Laka Boom Boom");
+});
+
+router.post("/signup", (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -42,11 +47,10 @@ router.get("/signup", (req, res) => {
   });
 });
 
-router.get("/signin", (req, res) => {
+router.post("/signin", (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res.status(422).json({ message: "enter all fields" });
-    return;
+    return res.status(422).json({ message: "enter all fields" });
   }
   User.findOne({ email: email }, function (err, foundUser) {
     if (err) {
@@ -57,10 +61,12 @@ router.get("/signin", (req, res) => {
       } else {
         bcrypt.compare(password, foundUser.password, function (err, result) {
           if (result) {
-            const token = jwt.sign({ _id: foundUser._id }, JWT_SECRET);
+            const token = jwt.sign({ _id: foundUser._id }, JWT_SECRET, {
+              expiresIn: "24h",
+            });
             res.json({ token: token });
           } else {
-            res.status(404).json({ message: "Wrong Password" });
+            res.status(422).json({ message: "Wrong Password" });
           }
         });
       }
