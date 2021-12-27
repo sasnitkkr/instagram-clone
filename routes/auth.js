@@ -10,10 +10,6 @@ const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../keys");
 
-router.get("/protected", requireLogin, (req, res) => {
-  res.send("Shaka Laka Boom Boom");
-});
-
 router.post("/signup", (req, res) => {
   const { name, email, password } = req.body;
 
