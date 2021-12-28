@@ -4,4 +4,4 @@
     password : "detective"
 }
 // set up home route in auth.js
-// signup route and test it with postman
+// signup route and test it with postman    
